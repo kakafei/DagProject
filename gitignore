@@ -1,5 +1,6 @@
-# .gitignore 示例
+
 target/
 .idea/
 *.iml
+**/target/
 *.log
