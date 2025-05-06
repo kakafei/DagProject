@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    {
+      "id": "A",
+      "className": "org.example.web.NodeA",
+      "dependencies": []
+    },
+    {
+      "id": "B",
+      "className": "org.example.web.NodeB",
+      "dependencies": []
+    },
+    {
+      "id": "C",
+      "className": "org.example.web.NodeC",
+      "dependencies": ["A", "B"]
+    },
+    {
+      "id": "D",
+      "className": "org.example.web.NodeD",
+      "dependencies": ["C"]
+    }
+  ]
+}
