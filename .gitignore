@@ -4,3 +4,8 @@ target/
 *.iml
 **/target/
 *.log
+.DS_Store
+.classpath
+.project
+.settings/
+/.idea/
