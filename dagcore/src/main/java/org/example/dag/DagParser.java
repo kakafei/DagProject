@@ -10,16 +10,14 @@ import java.util.*;
 
 public class DagParser {
     private static final ObjectMapper mapper = new ObjectMapper();
-
+    private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
     public static DagConfig parseConfig(InputStream inputStream) throws Exception {
         return mapper.readValue(inputStream, DagConfig.class);
     }
 
     public static List<TaskNode> createNodes(DagConfig config) throws Throwable {
         List<TaskNode> nodes = new ArrayList<>();
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
         for (DagConfig.NodeConfig nodeConfig : config.getNodes()) {
-
             Class<?> clazz = Class.forName(nodeConfig.getClassName());
             Constructor<?> ctor = clazz.getDeclaredConstructor(String.class, List.class);
             ctor.setAccessible(true);
