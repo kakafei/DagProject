@@ -9,7 +9,7 @@ import java.util.List;
  * 1. dag中可以根据任务的具体耗时，进行动态分配线程池。防止长时间任务阻塞整体执行。
  */
 public class DagRunner {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Throwable {
         // 1. 加载JSON配置
         InputStream configStream = DagRunner.class.getResourceAsStream("/dag.json");
         DagConfig config = DagParser.parseConfig(configStream);
@@ -24,7 +24,7 @@ public class DagRunner {
         // 4. 执行DAG
         DagContext context = new DagContext();
         context.setStart(System.currentTimeMillis());
-        context.setTimeout(50);
+        context.setTimeout(200);
         Object results = engine.execute(context);
         
         // 5. 输出最终结果

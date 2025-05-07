@@ -3,9 +3,10 @@ package org.example.dag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DagParser {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -14,29 +15,28 @@ public class DagParser {
         return mapper.readValue(inputStream, DagConfig.class);
     }
 
-    public static List<TaskNode> createNodes(DagConfig config) throws Exception {
+    public static List<TaskNode> createNodes(DagConfig config) throws Throwable {
         List<TaskNode> nodes = new ArrayList<>();
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
         for (DagConfig.NodeConfig nodeConfig : config.getNodes()) {
-            Class<?>[] paramTypes = {String.class, List.class};
-            Object[] params = {nodeConfig.getId(), nodeConfig.getDependencies()};
-            BaseTaskNode node = (BaseTaskNode) createInstance(nodeConfig.getClassName(),paramTypes,params);
+
+            Class<?> clazz = Class.forName(nodeConfig.getClassName());
+            Constructor<?> ctor = clazz.getDeclaredConstructor(String.class, List.class);
+            ctor.setAccessible(true);
+            MethodHandle methodHandle = lookup.unreflectConstructor(ctor);
+            Object[] args = prepareArguments(nodeConfig);
+            BaseTaskNode node = (BaseTaskNode) methodHandle.invokeWithArguments(args);
             node.setTimeOut(nodeConfig.getTimeOut());
             nodes.add(node);
         }
         return nodes;
     }
-    public static Object createInstance(String className, Class<?>[] paramTypes, Object[] params)
-            throws Exception {
-        // 1. 加载类
-        Class<?> clazz = Class.forName(className);
 
-        // 2. 获取构造函数（包括私有构造）
-        Constructor<?> constructor = clazz.getDeclaredConstructor(paramTypes);
-
-        // 3. 解除私有构造函数访问限制
-        constructor.setAccessible(true);
-
-        // 4. 传入参数创建实例
-        return constructor.newInstance(params);
+    private static Object[] prepareArguments(DagConfig.NodeConfig config) {
+        return new Object[] {
+                Objects.requireNonNull(config.getId(), "Node ID cannot be null"),
+                Optional.ofNullable(config.getDependencies()).orElse(Collections.emptyList())
+        };
     }
+
 }
